@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.qpassessment.qpgrocery.dto.BookItems;
 import com.qpassessment.qpgrocery.model.GroceryItem;
+import com.qpassessment.qpgrocery.model.User;
 import com.qpassessment.qpgrocery.service.GroceryBookingService;
 import com.qpassessment.qpgrocery.service.GroceryServiceInteface;
+import com.qpassessment.qpgrocery.service.user.UserServiceinterface;
 
 @RestController
 @RequestMapping("/api")
@@ -29,22 +31,32 @@ public class GroceryControllerImpl implements GroceryControllerInterface {
 	
 	@Autowired
 	private GroceryBookingService groceryBookingService;
-
+	
 	@Override
 	@GetMapping("/getAll")
-	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	public List<GroceryItem> getAll() {
 		return groceryService.getAllGroceryItems();
 	}
+	
 	@Override
 	@GetMapping("/grocery-items/available")
-	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 	public List<GroceryItem> getAvailable() {
 		return groceryService.getAvailableGroceryItems();
+	}	
+	
+	@Override
+	@PostMapping("/bookItems")
+	public ResponseEntity<Map<String, String>> bookItems(@RequestBody BookItems bookItems) {
+		  Map<String, String> bookingResult = groceryBookingService.bookItems(bookItems);
+		  return ResponseEntity.ok(bookingResult);
 	}
+	
+	/**
+	 * Below are the endpoints related to the grocery which can be only accessed by the ADMIN
+	 * 
+	 * */
 
 	@Override
-	@PreAuthorize("hasRole('ADMIN')") // Only ADMINs can access this
 	@PostMapping("/addItem")
 	public GroceryItem add(@RequestBody GroceryItem grocery) {
 		return groceryService.addGroceryItem(grocery);
@@ -52,7 +64,6 @@ public class GroceryControllerImpl implements GroceryControllerInterface {
 
 	@Override
 	@PutMapping("/update/{id}")
-	@PreAuthorize("hasRole('ADMIN')") // Only ADMINs can access this
 	public GroceryItem updateGroceryItem(@PathVariable int id, @RequestBody GroceryItem updatedItem) {
 		// Full update - the entire item is replaced
 		return groceryService.updateGroceryItem(id, updatedItem);
@@ -60,18 +71,10 @@ public class GroceryControllerImpl implements GroceryControllerInterface {
 	
 	@Override
 	@DeleteMapping("/delete/{id}")
-	@PreAuthorize("hasRole('ADMIN')") // Only ADMINs can access this
 	public void deleteGroceryItem(@PathVariable int id) {
 		 groceryService.deleteGroceryItem(id);
 	}
 	
-	
-	@Override
-	@PostMapping("/bookItems")
-	@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-	public ResponseEntity<Map<String, String>> bookItems(@RequestBody BookItems bookItems) {
-		  Map<String, String> bookingResult = groceryBookingService.bookItems(bookItems);
-		  return ResponseEntity.ok(bookingResult);
-	}
+
 
 }

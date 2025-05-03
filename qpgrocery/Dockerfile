@@ -1,14 +1,14 @@
-# Use a base Java image
-FROM openjdk:17-jdk-slim
+# Use a Tomcat base image
+FROM tomcat:9.0-jdk11-openjdk
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /usr/local/tomcat/webapps
 
-# Copy the application JAR
-COPY target/*.jar app.jar
+# Copy the WAR file into the Tomcat webapps directory
+COPY target/*.war ROOT.war
 
-# Expose the application port
+# Expose the port Tomcat will run on
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Start Tomcat
+CMD ["catalina.sh", "run"]
